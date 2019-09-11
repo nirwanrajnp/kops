@@ -75,6 +75,10 @@ spec:
                       items:
                         type: string
                       type: array
+                    crossZoneLoadBalancing:
+                      description: CrossZoneLoadBalancing allows you to enable the
+                        cross zone load balancing
+                      type: boolean
                     idleTimeoutSeconds:
                       description: IdleTimeoutSeconds sets the timeout of the api
                         loadbalancer.
@@ -118,9 +122,25 @@ spec:
               properties:
                 aws:
                   properties:
+                    cpuLimit:
+                      description: CPULimit CPU limit of AWS IAM Authenticator container.
+                        Default 10m
+                      type: string
+                    cpuRequest:
+                      description: CPURequest CPU request of AWS IAM Authenticator
+                        container. Default 10m
+                      type: string
                     image:
                       description: Image is the AWS IAM Authenticator docker image
                         to uses
+                      type: string
+                    memoryLimit:
+                      description: MemoryLimit memory limit of AWS IAM Authenticator
+                        container. Default 20Mi
+                      type: string
+                    memoryRequest:
+                      description: MemoryRequest memory request of AWS IAM Authenticator
+                        container. Default 20Mi
                       type: string
                   type: object
                 kopeio:
@@ -654,6 +674,9 @@ spec:
                   items:
                     type: string
                   type: array
+                admissionControlConfigFile:
+                  description: AdmissionControlConfigFile is the location of the admission-control-config-file
+                  type: string
                 allowPrivileged:
                   description: AllowPrivileged indicates if we can run privileged
                     containers
@@ -666,6 +689,12 @@ spec:
                   description: APIServerCount is the number of api servers
                   format: int32
                   type: integer
+                appendAdmissionPlugins:
+                  description: AppendAdmissionPlugins appends list of enabled admission
+                    plugins
+                  items:
+                    type: string
+                  type: array
                 auditLogFormat:
                   description: AuditLogFormat flag specifies the format type for audit
                     log files.
@@ -754,6 +783,19 @@ spec:
                 authorizationRbacSuperUser:
                   description: AuthorizationRBACSuperUser is the name of the superuser
                     for default rbac
+                  type: string
+                authorizationWebhookCacheAuthorizedTtl:
+                  description: The duration to cache authorized responses from the
+                    webhook token authorizer. Default is 5m. (default 5m0s)
+                  type: string
+                authorizationWebhookCacheUnauthorizedTtl:
+                  description: The duration to cache authorized responses from the
+                    webhook token authorizer. Default is 30s. (default 30s)
+                  type: string
+                authorizationWebhookConfigFile:
+                  description: File with webhook configuration for authorization in
+                    kubeconfig format. The API server will query the remote service
+                    to determine whether to authorize the request.
                   type: string
                 basicAuthFile:
                   description: 'TODO: Remove unused BasicAuthFile'
@@ -1083,6 +1125,16 @@ spec:
                 image:
                   description: Image is the docker image to use
                   type: string
+                kubeAPIBurst:
+                  description: KubeAPIBurst Burst to use while talking with kubernetes
+                    apiserver. (default 30)
+                  format: int32
+                  type: integer
+                kubeAPIQPS:
+                  description: KubeAPIQPS QPS to use while talking with kubernetes
+                    apiserver. (default 20)
+                  format: float
+                  type: number
                 leaderElection:
                   description: LeaderElection defines the configuration of leader
                     election client.
@@ -1315,6 +1367,15 @@ spec:
                 master:
                   description: Master is a url to the kube master
                   type: string
+                maxPersistentVolumes:
+                  description: 'MaxPersistentVolumes changes the maximum number of
+                    persistent volumes the scheduler will scheduler onto the same
+                    node. Only takes into affect if value is positive. This corresponds
+                    to the KUBE_MAX_PD_VOLS environment variable, which has been supported
+                    as far back as Kubernetes 1.7. The default depends on the version
+                    and the cloud provider as outlined: https://kubernetes.io/docs/concepts/storage/storage-limits/'
+                  format: int32
+                  type: integer
                 usePolicyConfigMap:
                   description: UsePolicyConfigMap enable setting the scheduler policy
                     from a configmap
@@ -1643,7 +1704,8 @@ spec:
                   type: string
                 volumePluginDirectory:
                   description: The full path of the directory in which to search for
-                    additional third party volume plugins
+                    additional third party volume plugins (this path must be writeable,
+                    dependant on your choice of OS)
                   type: string
                 volumeStatsAggPeriod:
                   description: VolumeStatsAggPeriod is the interval for kubelet to
@@ -1988,7 +2050,8 @@ spec:
                   type: string
                 volumePluginDirectory:
                   description: The full path of the directory in which to search for
-                    additional third party volume plugins
+                    additional third party volume plugins (this path must be writeable,
+                    dependant on your choice of OS)
                   type: string
                 volumeStatsAggPeriod:
                   description: VolumeStatsAggPeriod is the interval for kubelet to
@@ -2121,6 +2184,8 @@ spec:
                   type: object
                 cilium:
                   properties:
+                    IPTablesRulesNoinstall:
+                      type: boolean
                     accessLog:
                       type: string
                     agentLabels:
@@ -2129,9 +2194,19 @@ spec:
                       type: array
                     allowLocalhost:
                       type: string
+                    autoDirectNodeRoutes:
+                      type: boolean
                     autoIpv6NodeRoutes:
                       type: boolean
+                    bpfCTGlobalAnyMax:
+                      format: int64
+                      type: integer
+                    bpfCTGlobalTCPMax:
+                      format: int64
+                      type: integer
                     bpfRoot:
+                      type: string
+                    clusterName:
                       type: string
                     containerRuntime:
                       items:
@@ -2139,6 +2214,8 @@ spec:
                       type: array
                     containerRuntimeEndpoint:
                       type: object
+                    containerRuntimeLabels:
+                      type: string
                     debug:
                       type: boolean
                     debugVerbose:
@@ -2155,9 +2232,15 @@ spec:
                       type: boolean
                     disableMasquerade:
                       type: boolean
+                    enableNodePort:
+                      type: boolean
                     enablePolicy:
                       type: string
                     enableTracing:
+                      type: boolean
+                    enableipv4:
+                      type: boolean
+                    enableipv6:
                       type: boolean
                     envoyLog:
                       type: string
@@ -2209,9 +2292,13 @@ spec:
                     logstashProbeTimer:
                       format: int32
                       type: integer
+                    monitorAggregation:
+                      type: string
                     nat46Range:
                       type: string
                     pprof:
+                      type: boolean
+                    preallocateBPFMaps:
                       type: boolean
                     prefilterDevice:
                       type: string
@@ -2219,12 +2306,16 @@ spec:
                       type: string
                     restore:
                       type: boolean
+                    sidecarIstioProxyImage:
+                      type: string
                     singleClusterRoute:
                       type: boolean
                     socketPath:
                       type: string
                     stateDir:
                       type: string
+                    toFqdnsEnablePoller:
+                      type: boolean
                     tracePayloadlen:
                       format: int64
                       type: integer
@@ -2232,6 +2323,22 @@ spec:
                       type: string
                     version:
                       type: string
+                    waitBPFMount:
+                      type: boolean
+                  required:
+                  - enableipv6
+                  - enableipv4
+                  - monitorAggregation
+                  - bpfCTGlobalTCPMax
+                  - bpfCTGlobalAnyMax
+                  - preallocateBPFMaps
+                  - sidecarIstioProxyImage
+                  - clusterName
+                  - toFqdnsEnablePoller
+                  - waitBPFMount
+                  - IPTablesRulesNoinstall
+                  - autoDirectNodeRoutes
+                  - enableNodePort
                   type: object
                 classic:
                   type: object
@@ -2253,6 +2360,8 @@ spec:
                         rules, in seconds
                       format: int32
                       type: integer
+                  type: object
+                gce:
                   type: object
                 kopeio:
                   type: object
@@ -2309,6 +2418,10 @@ spec:
                     image:
                       description: Image is the location of container
                       type: string
+                    interval:
+                      description: Interval the time between retires for authorization
+                        request
+                      type: string
                     nodeURL:
                       description: NodeURL is the node authorization service url
                       type: string
@@ -2335,6 +2448,9 @@ spec:
               description: MasterIPRange                 string `json:",omitempty"`
                 NonMasqueradeCIDR is the CIDR for the internal k8s network (on which
                 pods & services live) It cannot overlap ServiceClusterIPRange
+              type: string
+            podCIDR:
+              description: PodCIDR is the CIDR from which we allocate IPs for pods
               type: string
             project:
               description: Project is the cloud project we should use, required on
